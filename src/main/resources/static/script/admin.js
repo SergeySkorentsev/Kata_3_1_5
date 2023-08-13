@@ -170,7 +170,6 @@ editForm.addEventListener('submit', e => {
 })
 //END EDIT
 //DELETE
-//window.deleteModal = contentDeleteModal
 async function deleteModal(id) {
     $('#modalDelete').modal('show')
     let del_url2 = urlUser + id
