@@ -8,19 +8,17 @@ import web.model.Role;
 import web.model.User;
 import web.service.RoleService;
 import web.service.UserService;
-
-import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
-public class RestApiController {
+@RequestMapping("/api/admin")
+public class RestApiAdminController {
 
     private UserService userService;
     private RoleService roleService;
 
     @Autowired
-    public RestApiController(UserService userService, RoleService roleService) {
+    public RestApiAdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
@@ -40,13 +38,9 @@ public class RestApiController {
         return  userService.getUser(id);
     }
 
-    @GetMapping("/current")
-    public User currentUser(Principal principal) {
-        return userService.findUserByUsername(principal.getName());
-    }
-
     @PostMapping("/add")
     public ResponseEntity<HttpStatus> save(@RequestBody User user) {
+        System.out.println(user);
         userService.addUser(user);
         return ResponseEntity.ok(HttpStatus.OK);
     }

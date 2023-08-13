@@ -1,9 +1,9 @@
-const urlAllUsers = "/api/users";
-const urlRoles = "/api/roles";
-const urlUser = "/api/user/";
-const urlUpdate = "/api/update";
-const urlAdd = "api/add/";
-const urlDelete = "api/delete/";
+const urlAllUsers = "/api/admin/users";
+const urlRoles = "/api/admin/roles";
+const urlUser = "/api/admin/user/";
+const urlUpdate = "/api/admin/update";
+const urlAdd = "/api/admin/add/";
+const urlDelete = "/api/admin/delete/";
 const usersTable = document.getElementById("adminTab");
 const idEditUser = document.querySelector("#idEditUser");
 const editName = document.querySelector("#editName");
@@ -11,6 +11,7 @@ const editLastname = document.querySelector("#editLastname");
 const editAge = document.querySelector("#editAge");
 const editEmail = document.querySelector("#editEmail");
 const pass = document.querySelector("#pass");
+const editUserRoles = document.querySelector("#editUserRoles");
 const editForm = document.getElementById('formEdit');
 const newUserForm = document.getElementById('newUserForm');
 const delId = document.getElementById('delId')
@@ -20,13 +21,26 @@ const delAge = document.getElementById('delAge')
 const delEmail = document.getElementById('delEmail')
 const delRoles = document.getElementById('delRoles')
 const deleteForm = document.getElementById('deleteForm')
+let newRoles = document.querySelector("#newRoles");
 let res = '';
+let option = "";
 getCurrentUser();
 getAllUsers();
+fillRoles();
 async function getAllRoles() {
     const res = await fetch(urlRoles);
     const roles = await res.json();
-    return roles.map(role => role.roleName);
+    return roles;
+}
+async function fillRoles() {
+    const allRoles = await getAllRoles();
+    newRoles.innerHTML = '';
+    allRoles.forEach(role => {
+        const option = document.createElement('option');
+        option.text = role.cutRoleName;
+        option.value = role.id;
+        newRoles.add(option);
+    });
 }
 async function getAllUsers() {
     await fetch (urlAllUsers, {
@@ -47,43 +61,48 @@ async function getAllUsers() {
                         <td>${user.email}</td>
                         <td>${user.cutRoles}</td>
                         <td><a id="btnEdit" class='btnEdit btn btn-info text-white' data-bs-toggle='modal' onclick="editModal(${user.id})">Edit</a></td>
-                        <td><a id="btnDelete" class='btnDelete btn btn-danger' data-bs-toggle='modal'>Delete</a></td>
+                        <td><a id="btnDelete" class='btnDelete btn btn-danger' data-bs-toggle='modal' onclick="deleteModal(${user.id})">Delete</a></td>
                     </tr>`;
             })
             usersTable.innerHTML = res;
         })
-        .catch(error => console.log(error));
+        .catch(error => console.error("Error:", error));
 }
 //NEW USER
 newUserForm.addEventListener('submit', newUser)
-async function newUser(ev) {
-    ev.preventDefault()
-    let newRoles = []
-    for(let i = 0; i < newRoles.length; i++){
-        newRoles.push({
-            id:newRoles[i].value
-        })
+async function newUser(e) {
+    e.preventDefault();
+    let roles = [];
+    for (let option of newRoles.options) {
+        if (option.selected) {
+            roles.push({
+                id: option.value
+            });
+        }
     }
-
     let method = {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            firstName: document.getElementById('newFirstName').value,
-            lastName: document.getElementById('newLastName').value,
-            age: document.getElementById('newAge').value,
-            email: document.getElementById('newEmail').value,
-            password: document.getElementById('newPass').value,
-            roles: newRoles
+            "firstName": document.getElementById('newFirstName').value,
+            "lastName": document.getElementById('newLastName').value,
+            "age": document.getElementById('newAge').value,
+            "email": document.getElementById('newEmail').value,
+            "password": document.getElementById('newPass').value,
+            "roles": roles
         })
     }
-    fetch(urlAdd, method).then(() => {
-        document.getElementById('v-pills-admin').click()
-        newUserForm.reset();
-        getAllUsers()
-    })
+    fetch(urlAdd, method)
+        .then(res => res.json())
+        .then(() => {
+            newUserForm.reset();
+            res = "";
+            getAllUsers();
+            document.getElementById('nav-users-tab').click();
+        })
+        .catch(error => console.error("Error:", error));
 }
 //END NEW USER
 //EDIT
@@ -98,53 +117,66 @@ async function editModal(id){
             editAge.value = user.age
             editEmail.value = user.email
             pass.value = user.password
+            const editRoles = await getAllRoles();
+            editUserRoles.innerHTML = '';
+            editRoles.forEach(role => {
+                const editOption = document.createElement('option');
+                editOption.text = role.cutRoleName;
+                editOption.value = role.id;
+                editUserRoles.add(editOption);
+            });
         })
     } else {
         alert('error')
     }
+    option = 'edit';
 }
 editForm.addEventListener('submit', e => {
     e.preventDefault()
-    let editRoles = []
-
-    for (let i = 0; i < editForm.roles.options.length; i++) {
-        if (editForm.roles.options[i].selected) {
-            let tmp = {}
-            tmp["id"] = editForm.roles.options[i].value
-            editRoles.push(tmp)
+    if (option === "edit") {
+        let editRoles = []
+        for (let option of editUserRoles.options) {
+            if (option.selected) {
+                editRoles.push({
+                    id: option.value
+                });
+            }
         }
+        let method = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "id": document.getElementById('idEditUser').value,
+                "firstName": document.getElementById('editName').value,
+                "lastName": document.getElementById('editLastname').value,
+                "age": document.getElementById('editAge').value,
+                "email": document.getElementById('editEmail').value,
+                "password": document.getElementById('pass').value,
+                "roles": editRoles
+            })
+        }
+        fetch(urlUpdate, method)
+            .then(res => res.json())
+            .then(() => {
+                $('#footered').click();
+                res = "";
+                getAllUsers()
+            })
+            .catch(error => console.error("Error:", error));
+    option = '';
     }
-    let method = {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            id: document.getElementById('idEditUser').value,
-            firstName: document.getElementById('editName').value,
-            lastName: document.getElementById('editLastname').value,
-            age: document.getElementById('editAge').value,
-            email: document.getElementById('editEmail').value,
-            password: document.getElementById('pass').value,
-            roles: editRoles
-        })
-    }
-    fetch(urlUpdate, method)
-        .then(res => res.json())
-        .then(() => {
-            $('#footered').click();
-            getAllUsers()
-        }).catch(error => console.log(error))
 })
 //END EDIT
 //DELETE
-window.contentDeleteModal = contentDeleteModal
-async function contentDeleteModal(id) {
-    $('#deleteModal').modal('show')
+//window.deleteModal = contentDeleteModal
+async function deleteModal(id) {
+    $('#modalDelete').modal('show')
     let del_url2 = urlUser + id
     let temp = await fetch(del_url2)
     if(temp.ok) {
-        await temp.json().then(user => {
+        await temp.json().then(async user => {
             delId.value = user.id
             delFirstName.value = user.firstName
             delLastName.value = user.lastName
@@ -155,19 +187,26 @@ async function contentDeleteModal(id) {
     } else {
         alert('delete error')
     }
+    option = 'delete';
 }
 deleteForm.addEventListener('submit', e => {
     e.preventDefault()
-    let method = {
-        method: 'DELETE',
-        headers: {
-            "Content-Type": "application/json"
+    if (option === 'delete') {
+        let method = {
+            method: 'DELETE',
+            headers: {
+                "Content-Type": "application/json"
+            }
         }
+        fetch(urlDelete + delId.value, method)
+            .then(res => res.json())
+            .then(() => {
+                $('#deleted').click();
+                res = "";
+                getAllUsers()
+            })
+            .catch(error => console.log(error));
+        option = '';
     }
-    fetch(urlDelete + delId.value, method)
-        .then(res => res.json())
-        .then(() => {
-            getAllUsers()
-        }).catch(error => console.log(error))
 })
 //END DELETE

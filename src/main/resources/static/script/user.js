@@ -1,4 +1,4 @@
-const urlCurrentUser = "/api/current";
+const urlCurrentUser = "/api/user/current";
 const header = document.getElementById("hdr");
 const userTable = document.getElementById("usertab");
 let result = '';

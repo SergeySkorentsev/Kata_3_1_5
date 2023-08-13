@@ -11,16 +11,8 @@ import java.security.Principal;
 
 @Controller
 public class UserController {
-    private UserServiceImpl userService;
-    @Autowired
-    public UserController(UserServiceImpl userService) {
-        this.userService = userService;
-    }
-
     @GetMapping(value = "/user")
-    public String getUser(ModelMap model, Principal principal) {
-        User user = userService.findUserByUsername(principal.getName());
-        model.addAttribute("currentUser", user);
+    public String getUser() {
         return "/user/user";
     }
 }
