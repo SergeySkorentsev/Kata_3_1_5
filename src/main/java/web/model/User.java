@@ -1,7 +1,5 @@
 package web.model;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -57,7 +55,7 @@ public class User implements UserDetails {
 //    @NotBlank(message = "Password must not be empty")
 //    @Size(min = 6, max = 12, message = "Password must be from 6 to 12 symbols lenght")
     private String password;
-    @JsonIgnore
+
     @ManyToMany (fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "UserId"),

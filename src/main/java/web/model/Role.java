@@ -1,5 +1,6 @@
 package web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Role {
     @Setter
     private String roleName;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "roles")
 //    @JoinTable(name = "users_roles",
 //            joinColumns = @JoinColumn(name = "RoleId"),

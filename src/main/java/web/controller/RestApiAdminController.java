@@ -40,7 +40,6 @@ public class RestApiAdminController {
 
     @PostMapping("/add")
     public ResponseEntity<HttpStatus> save(@RequestBody User user) {
-        System.out.println(user);
         userService.addUser(user);
         return ResponseEntity.ok(HttpStatus.OK);
     }
